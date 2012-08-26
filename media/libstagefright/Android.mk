@@ -1,6 +1,12 @@
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
+ifeq ($(BOARD_USES_ALSA_AUDIO),true)
+    ifeq ($(TARGET_BOARD_PLATFORM),msm8960)
+        LOCAL_CFLAGS += -DUSE_TUNNEL_MODE
+    endif
+endif
+
 include frameworks/av/media/libstagefright/codecs/common/Config.mk
 include $(TOP)/external/cedarx/Config.mk
 
@@ -66,11 +72,17 @@ LOCAL_SRC_FILES:=                         \
 ifeq ($(BOARD_USES_QCOM_HARDWARE),true)
 LOCAL_SRC_FILES+=                         \
         ExtendedExtractor.cpp             \
-        ExtendedWriter.cpp
+        ExtendedWriter.cpp                \
+        LPAPlayerALSA.cpp                 \
+        TunnelPlayer.cpp
 
 ifeq ($(BOARD_HAVE_QCOM_FM),true)
 LOCAL_SRC_FILES+=                         \
         FMA2DPWriter.cpp
+endif
+ifeq ($(BOARD_USES_ALSA_AUDIO),true)
+    LOCAL_C_INCLUDES += $(TARGET_OUT_HEADERS)/mm-audio/libalsa-intf
+    LOCAL_SHARED_LIBRARIES += libalsa-intf
 endif
 endif
 
@@ -119,12 +131,9 @@ LOCAL_STATIC_LIBRARIES := \
         libstagefright_id3 \
         libFLAC \
 
-ifeq ($(CEDARX_DEBUG_FRAMEWORK),S)
-LOCAL_STATIC_LIBRARIES += libstagefright_httplive_opt
-else
 LOCAL_LDFLAGS += \
 	$(TOP)/external/cedarx/CedarAndroidLib/LIB_JB_F23/libstagefright_httplive_opt.a
-endif
+
 ifneq ($(TARGET_BUILD_PDK), true)
 LOCAL_STATIC_LIBRARIES += \
 	libstagefright_chromium_http
