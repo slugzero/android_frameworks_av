@@ -303,6 +303,7 @@ uint32_t OMXCodec::getComponentQuirks(
     if (list->codecHasQuirk(
                 index, "supports-multiple-frames-per-input-buffer")) {
       quirks |= kSupportsMultipleFramesPerInputBuffer;
+    }
     if (list->codecHasQuirk(
                 index, "defers-output-buffer-allocation")) {
         quirks |= kDefersOutputBufferAllocation;
@@ -314,10 +315,6 @@ uint32_t OMXCodec::getComponentQuirks(
     if (list->codecHasQuirk(
                 index, "input-buffer-sizes-are-bogus")) {
       quirks |= kInputBufferSizesAreBogus;
-    }
-    if (list->codecHasQuirk(
-                index, "avoid-memcopy-input-recording-frames")) {
-      quirks |= kAvoidMemcopyInputRecordingFrames;
     }
 #ifdef QCOM_HARDWARE
     if (list->codecHasQuirk(
