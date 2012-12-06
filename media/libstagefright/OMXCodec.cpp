@@ -912,12 +912,8 @@ status_t OMXCodec::setVideoPortFormatType(
              index, format.eCompressionFormat, format.eColorFormat);
 #endif
 
-<<<<<<< HEAD
         if (!strcmp("OMX.TI.Video.encoder", mComponentName) ||
             !strcmp("OMX.TI.720P.Encoder", mComponentName)) {
-=======
-        if (!strcmp("OMX.TI.Video.encoder", mComponentName)) {
->>>>>>> 9832219... add support omap3 dec/enc (from ics)
             if (portIndex == kPortIndexInput
                     && colorFormat == format.eColorFormat) {
                 // eCompressionFormat does not seem right.
@@ -932,10 +928,6 @@ status_t OMXCodec::setVideoPortFormatType(
             }
         }
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 9832219... add support omap3 dec/enc (from ics)
         if (format.eCompressionFormat == compressionFormat
                 && format.eColorFormat == colorFormat) {
             found = true;

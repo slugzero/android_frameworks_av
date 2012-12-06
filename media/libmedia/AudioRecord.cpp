@@ -116,6 +116,7 @@ extern "C" AudioRecord *_ZN7android11AudioRecordC1EijijijPFviPvS1_ES1_ii(
         void* user,
         int notificationFrames,
         int sessionId);
+/*
 extern "C" AudioRecord *_ZN7android11AudioRecordC1EijijijPFviPvS1_ES1_i(
         AudioRecord *This,
         int inputSource,
@@ -131,7 +132,7 @@ extern "C" AudioRecord *_ZN7android11AudioRecordC1EijijijPFviPvS1_ES1_i(
     return _ZN7android11AudioRecordC1EijijijPFviPvS1_ES1_ii(This,
         inputSource, sampleRate, format, channels,
         frameCount, flags, cbf, user, notificationFrames, 0);
-}
+}*/
 #endif
 
 AudioRecord::~AudioRecord()
