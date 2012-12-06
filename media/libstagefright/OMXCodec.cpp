@@ -295,10 +295,12 @@ uint32_t OMXCodec::getComponentQuirks(
                 index, "input-buffer-sizes-are-bogus")) {
       quirks |= kInputBufferSizesAreBogus;
     }
+/*
     if (list->codecHasQuirk(
                 index, "avoid-memcopy-input-recording-frames")) {
       quirks |= kAvoidMemcopyInputRecordingFrames;
     }
+*/
     return quirks;
 }
 
