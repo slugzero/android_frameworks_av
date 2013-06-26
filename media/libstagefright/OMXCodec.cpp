@@ -5515,7 +5515,7 @@ status_t QueryCodec(
     // Color format query
     OMX_VIDEO_PARAM_PORTFORMATTYPE portFormat;
     InitOMXParams(&portFormat);
-    portFormat.nPortIndex = !isEncoder ? 1 : 0;
+    portFormat.nPortIndex = !isEncoder ? 0 : 1;
     for (OMX_U32 index = 0;;index++)  {
         portFormat.nIndex = index;
         err = omx->getParameter(
