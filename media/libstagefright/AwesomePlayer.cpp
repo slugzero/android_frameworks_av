@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2009 The Android Open Source Project
+ * Copyright (c) 2012, The Linux Foundation. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +42,7 @@
 #include <media/stagefright/AudioPlayer.h>
 #include <media/stagefright/DataSource.h>
 #include <media/stagefright/FileSource.h>
+#include <media/stagefright/FMRadioSource.h>
 #include <media/stagefright/MediaBuffer.h>
 #include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MediaExtractor.h>
@@ -1398,7 +1400,8 @@ status_t AwesomePlayer::getPosition(int64_t *positionUs) {
 status_t AwesomePlayer::seekTo(int64_t timeUs) {
     ATRACE_CALL();
 
-    if (mExtractorFlags & MediaExtractor::CAN_SEEK) {
+    if (((timeUs == 0) && (mExtractorFlags & MediaExtractor::CAN_SEEK_TO_ZERO)) ||
+        (mExtractorFlags & MediaExtractor::CAN_SEEK)) {
         Mutex::Autolock autoLock(mLock);
         return seekTo_l(timeUs);
     }
@@ -2013,6 +2016,18 @@ void AwesomePlayer::postCheckAudioStatusEvent(int64_t delayUs) {
         return;
     }
     mAudioStatusEventPending = true;
+
+#ifdef EXYNOS4_ENHANCEMENTS
+    /*
+     * Do not honor delay when audio reached EOS
+     * in order to change immediately time source from AudioPlayer to SystemTime
+     */
+    status_t finalStatus;
+    if (mWatchForAudioEOS && mAudioPlayer->reachedEOS(&finalStatus)) {
+        delayUs = 0;
+    }
+#endif
+
     // Do not honor delay when looping in order to limit audio gap
     if (mFlags & (LOOPING | AUTO_LOOPING)) {
         delayUs = 0;
@@ -2267,6 +2282,15 @@ status_t AwesomePlayer::finishSetDataSource_l() {
                 return UNKNOWN_ERROR;
             }
         }
+#ifdef STE_FM
+    } else if (!strncasecmp("fmradio://rx", mUri.string(), 12)) {
+        sniffedMIME = MEDIA_MIMETYPE_AUDIO_RAW;
+        dataSource = new FMRadioSource();
+        status_t err = dataSource->initCheck();
+        if (err != OK) {
+            return err;
+        }
+#endif
     } else {
         dataSource = DataSource::CreateFromURI(mUri.string(), &mUriHeaders);
     }

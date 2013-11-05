@@ -3,6 +3,10 @@ include $(CLEAR_VARS)
 
 include frameworks/av/media/libstagefright/codecs/common/Config.mk
 
+ifeq ($(BOARD_HTC_3D_SUPPORT),true)
+   LOCAL_CFLAGS += -DHTC_3D_SUPPORT
+endif
+
 LOCAL_SRC_FILES:=                         \
         ACodec.cpp                        \
         AACExtractor.cpp                  \
@@ -65,7 +69,28 @@ LOCAL_C_INCLUDES:= \
         $(TOP)/frameworks/native/services/connectivitymanager \
         $(TOP)/external/flac/include \
         $(TOP)/external/tremolo \
-        $(TOP)/external/openssl/include \
+        $(TOP)/external/openssl/include
+
+ifneq ($(TI_CUSTOM_DOMX_PATH),)
+LOCAL_C_INCLUDES += $(TI_CUSTOM_DOMX_PATH)/omx_core/inc
+LOCAL_CPPFLAGS += -DUSE_TI_CUSTOM_DOMX
+else
+LOCAL_C_INCLUDES += $(TOP)/frameworks/native/include/media/openmax
+endif
+
+ifeq ($(BOARD_USES_STE_FMRADIO),true)
+LOCAL_SRC_FILES += \
+        FMRadioSource.cpp                 \
+        PCMExtractor.cpp
+endif
+
+ifeq ($(TARGET_QCOM_MEDIA_VARIANT),caf)
+LOCAL_C_INCLUDES += \
+        $(TOP)/hardware/qcom/media-caf/mm-core/inc
+else
+LOCAL_C_INCLUDES += \
+        $(TOP)/hardware/qcom/media/mm-core/inc
+endif
 
 LOCAL_SHARED_LIBRARIES := \
         libbinder \
@@ -117,6 +142,20 @@ LOCAL_SHARED_LIBRARIES += \
         libdl
 
 LOCAL_CFLAGS += -Wno-multichar
+
+ifeq ($(BOARD_USE_SAMSUNG_COLORFORMAT), true)
+LOCAL_CFLAGS += -DUSE_SAMSUNG_COLORFORMAT
+
+# Include native color format header path
+LOCAL_C_INCLUDES += \
+	$(TOP)/hardware/samsung/exynos4/hal/include \
+	$(TOP)/hardware/samsung/exynos4/include
+
+endif
+
+ifeq ($(BOARD_USE_TI_DUCATI_H264_PROFILE), true)
+LOCAL_CFLAGS += -DUSE_TI_DUCATI_H264_PROFILE
+endif
 
 LOCAL_MODULE:= libstagefright
 

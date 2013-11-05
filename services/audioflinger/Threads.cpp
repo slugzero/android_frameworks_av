@@ -2278,7 +2278,13 @@ bool AudioFlinger::PlaybackThread::threadLoop()
         // to be called while waiting for async write callback
         if (mType == OFFLOAD) {
             for (size_t i = 0; i < effectChains.size(); i ++) {
-                effectChains[i]->process_l();
+#ifdef QCOM_HARDWARE
+                if (effectChains[i] != mAudioFlinger->mLPAEffectChain) {
+#endif
+                    effectChains[i]->process_l();
+#ifdef QCOM_HARDWARE
+                }
+#endif
             }
         }
 
@@ -2705,11 +2711,13 @@ void AudioFlinger::MixerThread::threadLoop_mix()
     int64_t pts;
     status_t status = INVALID_OPERATION;
 
+#ifndef ICS_AUDIO_BLOB
     if (mNormalSink != 0) {
         status = mNormalSink->getNextWriteTimestamp(&pts);
     } else {
         status = mOutputSink->getNextWriteTimestamp(&pts);
     }
+#endif
 
     if (status != NO_ERROR) {
         pts = AudioBufferProvider::kInvalidPTS;
