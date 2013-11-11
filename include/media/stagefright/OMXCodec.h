@@ -63,6 +63,13 @@ struct OMXCodec : public MediaSource,
 
         // Secure decoding mode
         kUseSecureInputBuffers = 256,
+
+        // Flag added to tell codec that playback is LPA/ULL. This is to ignore
+        // setting the usecase as it will be already set from Player.
+        kInLPAMode = 32768,
+        kULL = 65536,
+        kInTunnelMode = 131072
+
     };
     static sp<MediaSource> Create(
             const sp<IOMX> &omx,
@@ -85,6 +92,8 @@ struct OMXCodec : public MediaSource,
             MediaBuffer **buffer, const ReadOptions *options = NULL);
 
     virtual status_t pause();
+
+    virtual status_t updateConcurrencyParam(bool pauseflag);
 
     // from MediaBufferObserver
     virtual void signalBufferReturned(MediaBuffer *buffer);
@@ -234,6 +243,9 @@ private:
 
     bool mPaused;
 
+    String8 mUseCase;
+    bool mUseCaseFlag;
+
     sp<ANativeWindow> mNativeWindow;
 
     // The index in each of the mPortBuffers arrays of the buffer that will be
@@ -382,6 +394,7 @@ private:
     status_t applyRotation();
     status_t waitForBufferFilled_l();
 
+    status_t resumeLocked(bool drainInputBuf);
     int64_t getDecodingTimeUs();
 
     status_t parseAVCCodecSpecificData(
