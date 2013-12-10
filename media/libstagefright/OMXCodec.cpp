@@ -583,12 +583,7 @@ sp<MediaSource> OMXCodec::Create(
             observer->setCodec(codec);
 
             err = codec->configureCodec(meta);
-
             if (err == OK) {
-                if (!strcmp("OMX.Nvidia.mpeg2v.decode", componentName)) {
-                    codec->mFlags |= kOnlySubmitOneInputBufferAtOneTime;
-                }
-
                 return codec;
             }
 
@@ -1786,11 +1781,13 @@ OMXCodec::OMXCodec(
       mLeftOverBuffer(NULL),
       mPaused(false),
       mNativeWindow(
-              (!strncmp(componentName, "OMX.google.", 11)
 #ifdef OMAP_COMPAT
-              || !strncmp(componentName, "OMX.TI.", 7)
+              (!strncmp(componentName, "OMX.google.", 11)
+              || !strncmp(componentName, "OMX.TI.", 7))
+#else
+              (!strncmp(componentName, "OMX.google.", 11))
 #endif
-              || !strcmp(componentName, "OMX.Nvidia.mpeg2v.decode"))
+
 #ifdef QCOM_HARDWARE
                         ? NULL : nativeWindow),
       mNumBFrames(0),
