@@ -1781,8 +1781,7 @@ OMXCodec::OMXCodec(
 #else
               (!strncmp(componentName, "OMX.google.", 11))
 #endif
-              ? NULL : nativeWindow) {
-
+              ? NULL : nativeWindow),
 #ifdef QCOM_HARDWARE
       mNumBFrames(0),
 #endif
