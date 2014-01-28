@@ -258,8 +258,8 @@ void SoftwareRenderer::render(
                 dst_y[j + 1] = src[3];
                 dst_y[j + buf->stride] = src[nl_src + 1];
                 dst_y[j + buf->stride + 1] = src[nl_src + 3];
-                *dst_v++ = (src[2] + src[nl_src + 2]) / 2;
-                *dst_u++ = (src[0] + src[nl_src]) / 2;
+                *dst_u++ = (src[2] + src[nl_src + 2]) / 2;
+                *dst_v++ = (src[0] + src[nl_src]) / 2;
                 src += 4;
             }
             src += nl_src;
