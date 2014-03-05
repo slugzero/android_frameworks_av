@@ -97,6 +97,10 @@ LOCAL_SHARED_LIBRARIES := \
         libcamera_client libstagefright_foundation \
         libgui libdl libaudioutils
 
+ifeq ($(BOARD_USES_QCOM_HARDWARE),true)
+LOCAL_SHARED_LIBRARIES += libaudioparameter
+endif
+
 LOCAL_WHOLE_STATIC_LIBRARY := libmedia_helper
 
 ifeq ($(BOARD_USES_AUDIO_LEGACY),true)
