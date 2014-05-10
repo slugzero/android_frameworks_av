@@ -1872,7 +1872,7 @@ OMXCodec::OMXCodec(
               || !strncmp(componentName, "OMX.ffmpeg.", 11))
 #else
               (!strncmp(componentName, "OMX.ffmpeg.", 11)
-              !strncmp(componentName, "OMX.google.", 11))
+              || !strncmp(componentName, "OMX.google.", 11))
 #endif
               ? NULL : nativeWindow),
 #ifdef QCOM_HARDWARE
