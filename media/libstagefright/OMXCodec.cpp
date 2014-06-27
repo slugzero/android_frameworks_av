@@ -736,14 +736,28 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta) {
             CODEC_LOGI(
                     "AVC profile = %u (%s), level = %u",
                     profile, AVCProfileToString(profile), level);
-#ifdef OMAP_COMPAT
+
+#if defined(OMAP_ENHANCEMENT) || defined(OMAP_COMPAT)
+            int32_t width, height;
+            bool success = meta->findInt32(kKeyWidth, &width);
+            success = success && meta->findInt32(kKeyHeight, &height);
+            CHECK(success);
+            if (!strcmp(mComponentName, "OMX.TI.720P.Decoder")
+                && (profile == 0x42 /* Baseline */ && level <= 31)
+                && (width * height <= 414720 /* 864x480 */)
+                && (width <= 864 && height <= 864 ))
+            {
+                // Though this decoder can handle this profile/level,
+                // we prefer to use "OMX.TI.Video.Decoder" for
+                // Baseline Profile with level <=31 and sub 720p
+                return ERROR_UNSUPPORTED;
+            }
             if (!strcmp(mComponentName, "OMX.TI.Video.Decoder")
-                && (profile != kAVCProfileBaseline || level > 31)) {
+                && (profile != 0x42 /* Baseline */ || level > 31)) {
                 // This stream exceeds the decoder's capabilities. The decoder
                 // does not handle this gracefully and would clobber the heap
                 // and wreak havoc instead...
-
-                ALOGE("Profile and/or level exceed the decoder's capabilities.");
+                CODEC_LOGE("Profile and/or level exceed the decoder's capabilities.");
                 return ERROR_UNSUPPORTED;
             }
 #endif
@@ -779,6 +793,18 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta) {
     if (mIsEncoder) {
         CHECK(meta->findInt32(kKeyBitRate, &bitRate));
     }
+#ifdef OMAP_ENHANCEMENT
+        if (!strcmp(mComponentName, "OMX.TI.Video.encoder")) {
+            int32_t width, height;
+            bool success = meta->findInt32(kKeyWidth, &width);
+            success = success && meta->findInt32(kKeyHeight, &height);
+            CHECK(success);
+            if (width * height > 414720 /* 864x480 */) {
+                // require OMX.TI.720P.Encoder
+                return ERROR_UNSUPPORTED;
+            }
+        }
+#endif
     if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_AMR_NB, mMIME)) {
         setAMRFormat(false /* isWAMR */, bitRate);
     } else if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_AMR_WB, mMIME)) {
