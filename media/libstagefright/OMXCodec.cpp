@@ -793,7 +793,7 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta) {
     if (mIsEncoder) {
         CHECK(meta->findInt32(kKeyBitRate, &bitRate));
     }
-#ifdef OMAP_ENHANCEMENT
+#if defined(OMAP_ENHANCEMENT) || defined(OMAP_COMPAT)
         if (!strcmp(mComponentName, "OMX.TI.Video.encoder")) {
             int32_t width, height;
             bool success = meta->findInt32(kKeyWidth, &width);
