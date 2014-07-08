@@ -96,7 +96,6 @@ private:
     int mLongitudex10000;
     bool mAreGeoTagsAvailable;
     int32_t mStartTimeOffsetMs;
-    int mHFRRatio;
 
     Mutex mLock;
 
