@@ -925,6 +925,16 @@ status_t MPEG4Writer::reset() {
     }
 
     CHECK(mBoxes.empty());
+#if defined(OMAP_ENHANCEMENT) || defined(OMAP_COMPAT)
+    ALOGV(">>>> data saved, deleting tracks before next session");
+    while (!mTracks.empty()) {
+        List<Track *>::iterator it = mTracks.begin();
+        delete *it;
+        (*it) = NULL;
+        mTracks.erase(it);
+    }
+    mTracks.clear();
+#endif
 
     release();
     return err;
@@ -2265,10 +2275,18 @@ status_t MPEG4Writer::Track::threadEntry() {
 
         if (mOwner->exceedsFileSizeLimit()) {
             mOwner->notify(MEDIA_RECORDER_EVENT_INFO, MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED, 0);
+#if defined(OMAP_ENHANCEMENT) || defined(OMAP_COMPAT)
+            copy->release();
+            copy = NULL;
+#endif
             break;
         }
         if (mOwner->exceedsFileDurationLimit()) {
             mOwner->notify(MEDIA_RECORDER_EVENT_INFO, MEDIA_RECORDER_INFO_MAX_DURATION_REACHED, 0);
+#if defined(OMAP_ENHANCEMENT) || defined(OMAP_COMPAT)
+            copy->release();
+            copy = NULL;
+#endif
             break;
         }
 
