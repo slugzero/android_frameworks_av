@@ -896,6 +896,11 @@ extern "C" bool _ZN7android11AudioSystem15isLowVisibilityENS0_11stream_typeE(aud
 
 #endif // AUDIO_LEGACY
 
+extern "C" int _ZN7android11AudioSystem21setAudioTrackCallbackEPFvvE()
+{
+	return 0;
+}
+
 #ifdef USE_SAMSUNG_SEPARATEDSTREAM
 extern "C" bool _ZN7android11AudioSystem17isSeparatedStreamE19audio_stream_type_t(audio_stream_type_t stream)
 {
