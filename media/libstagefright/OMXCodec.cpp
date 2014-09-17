@@ -3629,6 +3629,11 @@ void OMXCodec::drainInputBuffers() {
                 continue;
             }
 
+#if defined OMAP_ENHANCEMENT && defined TARGET_OMAP3
+            if (mIsEncoder && mIsVideo && (i == 4)) {
+                break;
+            }
+#endif
             if (!drainInputBuffer(info)) {
                 break;
             }
@@ -3817,28 +3822,6 @@ bool OMXCodec::drainInputBuffer(BufferInfo *info) {
         }
 
         bool releaseBuffer = true;
-#if defined(OMAP_ENHANCEMENT) || defined(OMAP_COMPAT)
-        if (mIsEncoder && (mQuirks & kAvoidMemcopyInputRecordingFrames)) {
-            CHECK(mOMXLivesLocally && offset == 0);
-
-            OMX_BUFFERHEADERTYPE *header =
-                (OMX_BUFFERHEADERTYPE *)info->mBuffer;
-
-            CHECK(header->pBuffer == info->mData);
-
-            if (info->mAllocatedBuffer == NULL) {
-                info->mAllocatedBuffer = header->pBuffer;
-                info->mAllocatedSize = header->nAllocLen;
-            }
-
-            header->pBuffer =
-                (OMX_U8 *)srcBuffer->data() + srcBuffer->range_offset();
-            header->nAllocLen = srcBuffer->size() - srcBuffer->range_offset();
-
-            releaseBuffer = false;
-            info->mMediaBuffer = srcBuffer;
-        } else {
-#endif
 
         if (mFlags & kStoreMetaDataInVideoBuffers) {
                 releaseBuffer = false;
@@ -3852,6 +3835,21 @@ bool OMXCodec::drainInputBuffer(BufferInfo *info) {
 
                 CHECK(info->mMediaBuffer == NULL);
                 info->mMediaBuffer = srcBuffer;
+#if defined(OMAP_ENHANCEMENT) || defined(OMAP_COMPAT)
+        } else if (mIsEncoder && (mQuirks & kAvoidMemcopyInputRecordingFrames)) {
+                CHECK(mOMXLivesLocally && offset == 0);
+
+                OMX_BUFFERHEADERTYPE *header =
+                    (OMX_BUFFERHEADERTYPE *)info->mBuffer;
+
+                CHECK(header->pBuffer == info->mData);
+
+                header->pBuffer =
+                    (OMX_U8 *)srcBuffer->data() + srcBuffer->range_offset();
+
+                releaseBuffer = false;
+                info->mMediaBuffer = srcBuffer;
+#endif
         } else {
 #ifdef USE_SAMSUNG_COLORFORMAT
             OMX_PARAM_PORTDEFINITIONTYPE def;
@@ -3895,10 +3893,6 @@ bool OMXCodec::drainInputBuffer(BufferInfo *info) {
                     srcBuffer->range_length());
 #endif // USE_SAMSUNG_COLORFORMAT
         }
-
-#if defined(OMAP_ENHANCEMENT) || defined(OMAP_COMPAT)
-	}
-#endif
 
         int64_t lastBufferTimeUs;
         CHECK(srcBuffer->meta_data()->findInt64(kKeyTime, &lastBufferTimeUs));
@@ -5214,13 +5208,18 @@ status_t OMXCodec::read(
             mPaused = false;
         }
 
-        drainInputBuffers();
+        if (mQuirks & kRequiresFlushCompleteEmulation)
+            drainInputBuffers();
 
         if (mState == EXECUTING) {
             // Otherwise mState == RECONFIGURING and this code will trigger
             // after the output port is reenabled.
             fillOutputBuffers();
         }
+
+        if (!(mQuirks & kRequiresFlushCompleteEmulation))
+            drainInputBuffers();
+
     }
 
     if (seeking) {
