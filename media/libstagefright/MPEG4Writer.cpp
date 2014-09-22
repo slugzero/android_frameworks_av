@@ -1074,7 +1074,7 @@ static void StripStartcode(MediaBuffer *buffer) {
         return;
     }
 
-#if defined (OMAP_ENHANCEMENT) && defined (TARGET_OMAP3)
+#if defined (OMAP_ENHANCEMENT) || defined(OMAP_COMPAT)
     uint8_t *data =
         (uint8_t *)buffer->data() + buffer->range_offset();
     size_t size = buffer->range_length();
@@ -1628,7 +1628,7 @@ void MPEG4Writer::writeChunkToFile(Chunk* chunk) {
     while (!chunk->mSamples.empty()) {
         List<MediaBuffer *>::iterator it = chunk->mSamples.begin();
 
-#if defined (OMAP_ENHANCEMENT) && defined (TARGET_OMAP3)
+#if defined (OMAP_ENHANCEMENT) || defined(OMAP_COMPAT)
         off64_t offset = addSample_l(*it);
 #else
         off64_t offset = chunk->mTrack->isAvc()
@@ -2155,7 +2155,7 @@ status_t MPEG4Writer::Track::threadEntry() {
     uint32_t previousSampleSize = 0;  // Size of the previous sample
     int64_t previousPausedDurationUs = 0;
     int64_t timestampUs = 0;
-#if (defined(OMAP_ENHANCEMENT) && defined(TARGET_OMAP3))
+#if defined(OMAP_ENHANCEMENT) || defined(OMAP_COMPAT)
     uint8_t *copy_spspps = 0;
     int32_t copy_spspps_size = 0;
 #endif
@@ -2225,7 +2225,7 @@ status_t MPEG4Writer::Track::threadEntry() {
             continue;
         }
 
-#if (defined(OMAP_ENHANCEMENT) && defined(TARGET_OMAP3))
+#if defined(OMAP_ENHANCEMENT) || defined(OMAP_COMPAT)
         else if (mIsAvc && count < 3) {
             size_t size = buffer->range_length();
             size_t start_code_size = 0;
@@ -2295,7 +2295,7 @@ status_t MPEG4Writer::Track::threadEntry() {
 
         // Make a deep copy of the MediaBuffer and Metadata and release
         // the original as soon as we can
-#if defined (OMAP_ENHANCEMENT) && defined (TARGET_OMAP3)
+#if defined (OMAP_ENHANCEMENT) || defined(OMAP_COMPAT)
         MediaBuffer *copy;
         size_t start_code_size = 0;
 
@@ -2323,7 +2323,7 @@ status_t MPEG4Writer::Track::threadEntry() {
         if (mIsAvc) StripStartcode(copy);
 
         size_t sampleSize = copy->range_length();
-#if !defined (OMAP_ENHANCEMENT) || !defined (TARGET_OMAP3)
+#ifndef TARGET_OMAP3
         if (mIsAvc) {
             if (mOwner->useNalLengthFour()) {
                 sampleSize += 4;
@@ -2499,7 +2499,7 @@ status_t MPEG4Writer::Track::threadEntry() {
 
         // use File write in seperate thread for video only recording
         if (!hasMultipleTracks && mIsAudio) {
-#if defined (OMAP_ENHANCEMENT) && defined (TARGET_OMAP3)
+#if defined (OMAP_ENHANCEMENT) || defined(OMAP_COMPAT)
             off64_t offset = mOwner->addSample_l(copy);
 #else
             off64_t offset = mIsAvc? mOwner->addLengthPrefixedSample_l(copy)

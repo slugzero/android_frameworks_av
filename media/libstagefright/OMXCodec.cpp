@@ -553,23 +553,6 @@ sp<MediaSource> OMXCodec::Create(
 
         ALOGV("Attempting to allocate OMX node '%s'", componentName);
 
-#ifdef OMAP_COMPAT
-        if (!strcmp(componentName, "OMX.TI.Video.Decoder")) {
-            int32_t width, height;
-            bool success = meta->findInt32(kKeyWidth, &width);
-            success = success && meta->findInt32(kKeyHeight, &height);
-            CHECK(success);
-            // We need this for 720p video without AVC profile
-            // Not a good solution, but ..
-            if (width*height > 412800) {  //860*480
-               componentName = "OMX.TI.720P.Decoder";
-               ALOGE("Format exceed the decoder's capabilities. %d", width*height);
-               continue;
-            }
-        }
-#endif
-
-
         if (!createEncoder
                 && (quirks & kOutputBuffersAreUnreadable)
                 && (flags & kClientNeedsFramebuffer)) {
@@ -3629,7 +3612,7 @@ void OMXCodec::drainInputBuffers() {
                 continue;
             }
 
-#if defined OMAP_ENHANCEMENT && defined TARGET_OMAP3
+#if defined(OMAP_ENHANCEMENT) || defined(OMAP_COMPAT)
             if (mIsEncoder && mIsVideo && (i == 4)) {
                 break;
             }
@@ -3835,7 +3818,7 @@ bool OMXCodec::drainInputBuffer(BufferInfo *info) {
 
                 CHECK(info->mMediaBuffer == NULL);
                 info->mMediaBuffer = srcBuffer;
-#if defined(OMAP_ENHANCEMENT) || defined(OMAP_COMPAT)
+#if defined(OMAP_ENHANCEMENT)
         } else if (mIsEncoder && (mQuirks & kAvoidMemcopyInputRecordingFrames)) {
                 CHECK(mOMXLivesLocally && offset == 0);
 
