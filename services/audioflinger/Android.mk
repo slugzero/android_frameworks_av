@@ -66,6 +66,17 @@ LOCAL_SHARED_LIBRARIES := \
     libdl \
     libpowermanager
 
+#QTI Resampler
+ifeq ($(call is-vendor-board-platform,QCOM),true)
+ifeq ($(strip $(BOARD_USES_QCOM_RESAMPLER)),true)
+LOCAL_SRC_FILES += AudioResamplerQTI.cpp.arm
+LOCAL_C_INCLUDES += $(TARGET_OUT_HEADERS)/mm-audio/audio-src
+LOCAL_SHARED_LIBRARIES += libqct_resampler
+LOCAL_CFLAGS += -DQTI_RESAMPLER
+endif
+endif
+#QTI Resampler
+
 LOCAL_STATIC_LIBRARIES := \
     libscheduling_policy \
     libcpustats \
@@ -83,6 +94,10 @@ endif
 # Define ENABLE_RESAMPLE_IN_PCM_OFFLOAD_PATH
 ifeq ($(strip $(BOARD_USE_RESAMPLER_IN_PCM_OFFLOAD_PATH)),true)
 LOCAL_CFLAGS += -DENABLE_RESAMPLER_IN_PCM_OFFLOAD_PATH
+endif
+
+ifneq ($(AUDIO_FEATURE_ENABLED_ULTRA_LOW_LATENCY),true)
+LOCAL_CFLAGS += -DNATIVE_FAST_TRACKS_ONLY
 endif
 
 # Define ANDROID_SMP appropriately. Used to get inline tracing fast-path.
