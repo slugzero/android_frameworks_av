@@ -54,6 +54,11 @@ LOCAL_C_INCLUDES += \
 	system/media/camera/include \
 	system/media/private/camera/include \
 
+ifeq ($(BOARD_OVERLAY_BASED_CAMERA_HAL),true)
+    LOCAL_CFLAGS += -DUSE_OVERLAY_CPP
+    LOCAL_SRC_FILES += Overlay.cpp
+endif
+
 LOCAL_MODULE:= libcamera_client
 
 include $(BUILD_SHARED_LIBRARY)
