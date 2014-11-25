@@ -33,8 +33,9 @@
 
 #include <inttypes.h>
 
+#ifdef ENABLE_AV_ENHANCEMENTS
 #include <ExtendedUtils.h>
-#include <QCMediaDefs.h>
+#endif
 
 namespace android {
 
@@ -904,7 +905,9 @@ static void addESDSFromCodecPrivate(
 
     meta->setData(kKeyESDS, 0, esds, esdsSize);
 
+#ifdef ENABLE_AV_ENHANCEMENTS
     ExtendedUtils::updateVideoTrackInfoFromESDS_MPEG4Video(meta);
+#endif
 
     delete[] esds;
     esds = NULL;
